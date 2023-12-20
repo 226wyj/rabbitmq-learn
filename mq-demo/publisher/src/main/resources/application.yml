@@ -1,6 +1,8 @@
 logging:
   pattern:
     dateformat: MM-dd HH:mm:ss:SSS
+  level:
+    com.itheima: debug
 spring:
   rabbitmq:
     host: localhost
@@ -12,3 +14,5 @@ spring:
     template:
       retry:
         enabled: true
+    publisher-confirm-type: correlated
+    publisher-returns: true

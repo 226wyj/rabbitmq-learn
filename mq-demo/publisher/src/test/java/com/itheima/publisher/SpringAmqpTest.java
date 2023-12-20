@@ -1,13 +1,18 @@
 package com.itheima.publisher;
 
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
+import org.springframework.amqp.rabbit.connection.CorrelationData;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.util.concurrent.ListenableFutureCallback;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
+@Slf4j
 @SpringBootTest
 public class SpringAmqpTest {
     @Autowired
@@ -57,5 +62,32 @@ public class SpringAmqpTest {
         msg.put("name", "jack");
         msg.put("age", 21);
         rabbitTemplate.convertAndSend("object.queue", msg);
+    }
+
+    @Test
+    void testConfirmCallback() {
+        // 1. 创建 cd
+        CorrelationData cd = new CorrelationData(UUID.randomUUID().toString());
+        // 1. 添加 ConfirmCallback
+        cd.getFuture().addCallback(new ListenableFutureCallback<CorrelationData.Confirm>() {
+            @Override
+            public void onFailure(final Throwable ex) {
+                log.error("消息回调失败", ex);
+            }
+
+            @Override
+            public void onSuccess(final CorrelationData.Confirm result) {
+                log.debug("收到 confirm callback 回执");
+                if (result.isAck()) {
+                    // 消息发送成功
+                    log.debug("消息发送成功，收到 ack");
+                } else {
+                    // 消息发送失败
+                    log.debug("消息发送失败，收到 nack，原因：{}", result.getReason());
+                }
+            }
+        });
+
+        rabbitTemplate.convertAndSend("hmall.direct", "red", "hello", cd);
     }
 }
