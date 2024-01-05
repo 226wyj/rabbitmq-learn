@@ -11,8 +11,11 @@ spring:
     username: hmall
     password: 123
     connection-timeout: 1s
-    template:
-      retry:
-        enabled: true
-    publisher-confirm-type: correlated
-    publisher-returns: true
+    listener:
+      simple:
+        acknowledge-mode: auto
+        prefetch: 1
+        retry:
+          enabled: true
+#    publisher-confirm-type: correlated
+#    publisher-returns: true

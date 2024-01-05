@@ -65,7 +65,7 @@ public class SpringAmqpTest {
     }
 
     @Test
-    void testConfirmCallback() {
+    void testConfirmCallback() throws InterruptedException {
         // 1. 创建 cd
         CorrelationData cd = new CorrelationData(UUID.randomUUID().toString());
         // 1. 添加 ConfirmCallback
@@ -89,5 +89,6 @@ public class SpringAmqpTest {
         });
 
         rabbitTemplate.convertAndSend("hmall.direct", "red", "hello", cd);
+        Thread.sleep(2000);
     }
 }
